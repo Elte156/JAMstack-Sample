@@ -44,8 +44,8 @@
             </div>
           </li>
         </ul>
-        <form class="form-inline my-2 my-lg-0">
-          <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
+        <form class="form-inline my-2 my-lg-0" onsubmit="return newsSearch(event)">
+          <input id="news--search" class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
           <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
         </form>
       </div>
@@ -103,18 +103,43 @@
     <script src="dist/js/bootstrap.min.js"></script>
 
     <script>
+      function newsSearch(e) {
+        e.preventDefault();
+        try {
+          window.location.href = window.location.pathname+"?"+$.param({'search':$("#news--search").val()});
+        } catch (e) {
+          throw new Error(e.message);
+        }
+        return false;
+      }
+    </script>
+
+    <script>
+      // https://stackoverflow.com/a/41152400/1583548
+      //URL is http://www.example.com/mypage?ref=registration&email=bobo@example.com
+      $.urlParam = function (name) {
+          var results = new RegExp('[\?&]' + name + '=([^&#]*)')
+                            .exec(window.location.search);
+          return (results !== null) ? results[1] || 0 : false;
+      }
+      // console.log($.urlParam('ref')); //registration
+      // console.log($.urlParam('email')); //bobo@example.com
+
+
+      // Get query param and fill it in
+      let newsQuery = $.urlParam('search');
+      if (!newsQuery) {
+        newsQuery = "";
+      }
+
+
+      // Get News API
       var url = 'https://newsapi.org/v2/top-headlines?' +
+            'q=' + newsQuery + '&' +
             'country=us&' +
             'apiKey=fb1bd64055aa49ac8fbd38a466e2b9b7';
       var req = new Request(url);
       fetch(req)
-          // .then(res => res.json())
-          // .then(res => {
-          //   this.films = res.results;
-          // });
-          // .then(function(response) {
-          //     console.log(response.json());
-          // });
           .then(res => res.json())
           .then(res => {
             for (let index = 0; index < res.articles.length; index++) {
